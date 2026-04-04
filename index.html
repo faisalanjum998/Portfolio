@@ -3,814 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faisal | High-Retention Video Editor for Creators</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Faisal | Premium Video Editor & Visual Strategist</title>
     
-    <style>
-        /* --- DESIGN TOKENS & VARIABLES --- */
-        :root {
-            --bg-dark: #07090f;
-            --bg-glass: rgba(255, 255, 255, 0.02);
-            --border-glass: rgba(255, 255, 255, 0.06);
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            --accent-glow: rgba(139, 92, 246, 0.25);
-            --success-green: #25D366;
-            --transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
 
-        /* --- RESET & BASE --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+    <style>
+        :root {
+            --bg: #030305;
+            --accent: #7c3aed;
+            --accent-glow: rgba(124, 58, 237, 0.3);
+            --text: #ffffff;
+            --text-dim: #64748b;
+            --glass: rgba(255, 255, 255, 0.02);
+            --border: rgba(255, 255, 255, 0.08);
             scroll-behavior: smooth;
         }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.6;
+        /* Base Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
+            cursor: none; /* Custom cursor used below */
         }
 
-        /* Ambient Background Glows */
-        .ambient-blob {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(120px);
-            z-index: -1;
-            opacity: 0.3;
-            animation: pulse-blob 15s infinite alternate ease-in-out;
-        }
-        .blob-1 { top: -10%; left: -5%; width: 50vw; height: 50vw; background: rgba(59, 130, 246, 0.2); }
-        .blob-2 { bottom: -10%; right: -5%; width: 40vw; height: 40vw; background: rgba(139, 92, 246, 0.2); animation-delay: -5s; }
-
-        @keyframes pulse-blob {
-            0% { transform: scale(1) translate(0, 0); }
-            100% { transform: scale(1.1) translate(30px, 30px); }
+        /* Advanced Custom Cursor */
+        #cursor {
+            position: fixed; width: 15px; height: 15px;
+            background: #fff; border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            mix-blend-mode: difference; transition: transform 0.15s ease;
         }
 
-        /* --- LAYOUT UTILITIES --- */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+        /* 3D Canvas Layer */
+        #canvas-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1; filter: blur(60px); opacity: 0.5;
         }
 
-        section {
-            padding: 6rem 0;
-            position: relative;
-        }
-
-        .text-gradient {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 1rem;
-            letter-spacing: -1px;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: var(--text-secondary);
-            margin-bottom: 4rem;
-            font-size: 1.1rem;
-        }
-
-        /* --- BUTTONS --- */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            text-decoration: none;
-            transition: var(--transition);
-            cursor: pointer;
-            border: none;
-            z-index: 1;
-            position: relative;
-        }
-
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.03);
-            color: white;
-            border: 1px solid var(--border-glass);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-        }
-
-        /* --- NAVBAR --- */
+        /* Navigation */
         nav {
-            position: fixed;
-            top: 0; width: 100%;
-            padding: 1.5rem 0;
-            background: rgba(7, 9, 15, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-glass);
-            z-index: 1000;
-            transition: var(--transition);
+            position: fixed; top: 0; width: 100%; padding: 2rem 0;
+            z-index: 1000; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        nav.scrolled { padding: 1rem 0; background: rgba(7, 9, 15, 0.85); }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo { font-size: 1.5rem; font-weight: 800; text-decoration: none; color: white; letter-spacing: -1px; }
-        .logo span { color: #8b5cf6; }
-
-        .nav-links { display: flex; gap: 2rem; list-style: none; }
-        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: var(--transition); }
-        .nav-links a:hover { color: white; }
-
-        /* --- 1. HERO SECTION --- */
-        #hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding-top: 80px;
-        }
-
-        .hero-tag {
-            display: inline-block;
-            padding: 0.5rem 1.2rem;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 50px;
-            color: #60a5fa;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hero-title {
-            font-size: 4.5vw;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            max-width: 900px;
-            letter-spacing: -2px;
-        }
-
-        .hero-subtitle {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 3rem;
-        }
-
-        .hero-buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 3rem; }
+        nav.scrolled { background: rgba(3, 3, 5, 0.8); padding: 1rem 0; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); }
         
-        .trust-line {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1300px; margin: 0 auto; padding: 0 2rem; }
+        .logo { font-weight: 800; font-size: 1.4rem; letter-spacing: -1px; text-decoration: none; color: #fff; }
+        .logo span { color: var(--accent); }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
         }
-
-        /* --- 2. SOCIAL PROOF STRIP --- */
-        .proof-strip {
-            border-top: 1px solid var(--border-glass);
-            border-bottom: 1px solid var(--border-glass);
-            background: linear-gradient(90deg, transparent, var(--bg-glass), transparent);
-            padding: 2.5rem 0;
-            margin-bottom: 4rem;
+        .hero h1 {
+            font-size: clamp(3.5rem, 10vw, 7rem); font-weight: 800;
+            line-height: 0.9; letter-spacing: -5px; margin-bottom: 2rem;
         }
+        .reveal-box { overflow: hidden; display: inline-block; }
+        .hero-sub { color: var(--text-dim); font-size: 1.2rem; max-width: 600px; opacity: 0; }
 
-        .proof-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 2rem;
-            text-align: center;
+        /* Advanced Portfolio Grid */
+        .portfolio { padding: 10rem 2rem; max-width: 1300px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 4rem; }
+
+        .card {
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 40px; overflow: hidden; transform-style: preserve-3d;
+            transition: border 0.3s ease;
         }
+        .card:hover { border-color: var(--accent); }
+        .video-box { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
+        .video-box iframe { position: absolute; width: 100%; height: 100%; border: none; }
+        .card-info { padding: 2.5rem; transform: translateZ(40px); }
+        .card-info h3 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .card-tag { display: inline-block; padding: 0.4rem 1rem; background: var(--accent); border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
 
-        .proof-item h4 { font-size: 2.5rem; font-weight: 800; color: white; line-height: 1; }
-        .proof-item p { color: #8b5cf6; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem;}
-
-        /* --- 3. SERVICES (RESULT-FOCUSED) --- */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+        /* Stats Strip */
+        .stats {
+            display: flex; justify-content: space-around; padding: 5rem;
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 50px; margin: 5rem 0; text-align: center;
         }
+        .stat h2 { font-size: 4rem; color: var(--accent); font-weight: 800; }
 
-        .glass-card {
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 3rem 2rem;
-            backdrop-filter: blur(12px);
-            transition: var(--transition);
+        /* CTA Footer */
+        .cta {
+            background: linear-gradient(180deg, transparent, var(--accent-glow));
+            padding: 10rem 2rem; text-align: center; border-radius: 80px 80px 0 0;
         }
-
-        .glass-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(139, 92, 246, 0.3);
-            background: rgba(255, 255, 255, 0.04);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        .btn {
+            display: inline-block; padding: 1.5rem 4rem; background: #fff;
+            color: #000; text-decoration: none; border-radius: 100px;
+            font-weight: 800; font-size: 1.1rem; transition: 0.4s;
         }
+        .btn:hover { transform: translateY(-10px); box-shadow: 0 20px 40px var(--accent-glow); }
 
-        .card-icon { font-size: 2.5rem; margin-bottom: 1.5rem; }
-        .glass-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: white; }
-        .glass-card p { color: var(--text-secondary); }
-
-        /* --- 4. FEATURED WORK (LONG FORM) --- */
-        .work-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 3rem;
-        }
-
-        .video-card {
-            border-radius: 20px;
-            overflow: hidden;
-        }
-
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 */
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--border-glass);
-            transition: var(--transition);
-        }
-
-        .video-card:hover .video-wrapper {
-            border-color: rgba(59, 130, 246, 0.5);
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px var(--accent-glow);
-        }
-
-        .video-wrapper iframe {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        }
-
-        .video-results { margin-top: 1.5rem; }
-        .video-results h4 { font-size: 1.2rem; margin-bottom: 0.5rem; }
-        .result-tags { display: flex; gap: 0.8rem; }
-        .tag {
-            background: rgba(139, 92, 246, 0.1);
-            color: #a78bfa;
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-
-        /* --- 5. FEATURED SHORTS (9:16) --- */
-        .shorts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 2rem;
-        }
-
-        .short-wrapper {
-            aspect-ratio: 9/16;
-            position: relative;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--border-glass);
-            transition: var(--transition);
-        }
-
-        .video-card:hover .short-wrapper {
-            border-color: rgba(139, 92, 246, 0.5);
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px var(--accent-glow);
-        }
-
-        .short-wrapper iframe {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        }
-
-        /* --- 6. BEFORE VS AFTER --- */
-        .transformation-banner {
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .transformation-banner h2 { font-size: 2.5rem; margin-bottom: 1rem; }
-        .transformation-banner p { color: var(--text-secondary); font-size: 1.2rem; }
-
-        /* --- 7. ABOUT --- */
-        .about-content {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-        }
-        .about-content span { color: white; font-weight: 600; }
-
-        /* --- 8. OFFER SECTION --- */
-        .offer-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            border-radius: 30px;
-            padding: 4rem;
-            max-width: 700px;
-            margin: 0 auto;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(139, 92, 246, 0.15);
-        }
-
-        .offer-tag {
-            position: absolute;
-            top: -15px; left: 50%; transform: translateX(-50%);
-            background: var(--accent-gradient);
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .price { font-size: 4rem; font-weight: 800; margin: 1.5rem 0; line-height: 1; }
-        .offer-list { list-style: none; margin: 2rem 0; text-align: left; display: inline-block;}
-        .offer-list li { margin-bottom: 1rem; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;}
-        .offer-list li::before { content: '✓'; color: #3b82f6; font-weight: bold; }
-        .urgency { color: #ef4444; font-size: 0.9rem; font-weight: 600; margin-top: 1.5rem; }
-
-        /* --- 9. CONTACT FORM --- */
-        .contact-wrapper {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .form-group { margin-bottom: 1.5rem; }
-        
-        input, select, textarea {
-            width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-glass);
-            padding: 1.2rem;
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #8b5cf6;
-            background: rgba(0,0,0,0.5);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
-        }
-
-        select option { background: var(--bg-dark); color: white; }
-        textarea { min-height: 150px; resize: vertical; }
-
-        .microcopy { text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-top: 1rem; }
-
-        /* --- WHATSAPP FLOATING BUTTON --- */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: var(--success-green);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            text-decoration: none;
-            transition: var(--transition);
-            animation: pulse-wa 2s infinite;
-        }
-
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            background-color: #20b858;
-        }
-
-        .whatsapp-float svg { width: 35px; height: 35px; fill: currentColor; }
-
-        /* Tooltip */
-        .whatsapp-float::before {
-            content: "Chat on WhatsApp";
-            position: absolute;
-            right: 75px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition);
-            backdrop-filter: blur(5px);
-            border: 1px solid var(--border-glass);
-        }
-
-        .whatsapp-float:hover::before { opacity: 1; right: 75px; }
-
-        @keyframes pulse-wa {
-            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
-            70% { box-shadow: 0 0 0 20px rgba(37, 211, 102, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
-        }
-
-        /* --- ANIMATIONS (SCROLL REVEAL) --- */
-        .reveal { opacity: 0; transform: translateY(40px); transition: 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .delay-1 { transition-delay: 0.1s; }
-        .delay-2 { transition-delay: 0.2s; }
-        .delay-3 { transition-delay: 0.3s; }
-
-        /* Form Success Message */
-        #form-success { display: none; color: var(--success-green); text-align: center; font-weight: bold; margin-top: 1rem; padding: 1rem; background: rgba(37,211,102,0.1); border-radius: 8px; border: 1px solid var(--success-green); }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 992px) {
-            .hero-title { font-size: 3.5rem; }
-            .work-grid { grid-template-columns: 1fr; }
-        }
         @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hero-title { font-size: 2.8rem; }
-            .hero-buttons { flex-direction: column; }
-            section { padding: 4rem 0; }
-            .price { font-size: 3rem; }
-            .offer-card { padding: 3rem 1.5rem; }
-            .proof-container { flex-direction: column; gap: 3rem; }
+            .grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 4rem; }
+            .stats { flex-direction: column; gap: 3rem; }
+            body { cursor: auto; }
+            #cursor { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="ambient-blob blob-1"></div>
-    <div class="ambient-blob blob-2"></div>
+    <div id="cursor"></div>
+    <div id="canvas-container"></div>
 
     <nav id="navbar">
-        <div class="container nav-container">
-            <a href="#" class="logo">Faisal<span>.</span></a>
-            <ul class="nav-links">
-                <li><a href="#services">Services</a></li>
-                <li><a href="#portfolio">Work</a></li>
-                <li><a href="#offer">Offer</a></li>
-            </ul>
-            <a href="#contact" class="btn btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">Book Call</a>
+        <div class="nav-inner">
+            <a href="#" class="logo">FAISAL<span>.</span></a>
+            <a href="#contact" class="btn" style="padding: 0.8rem 2rem; font-size: 0.9rem;">Book Now</a>
         </div>
     </nav>
 
-    <section id="hero" class="container">
-        <span class="hero-tag reveal">Video Editing For Creators</span>
-        <h1 class="hero-title reveal delay-1">I help content creators turn reels into <span class="text-gradient">Pro EDITS </span></h1>
-        <p class="hero-subtitle reveal delay-2">High-retention video edits designed to increase views, followers, and conversions.</p>
-        
-        <div class="hero-buttons reveal delay-3">
-            <a href="#contact" class="btn btn-primary">Get Free Reel Idea</a>
-            <a href="#portfolio" class="btn btn-secondary">View My Work</a>
-        </div>
-        
-        <div class="trust-line reveal delay-3">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            Helping creators grow faster with high-performing content
-        </div>
-    </section>
+    <main>
+        <section class="hero">
+            <h1>
+                <div class="reveal-box"><span class="t-rev">RETENTION</span></div><br>
+                <div class="reveal-box"><span class="t-rev" style="color:var(--accent)">ENGINEERED</span></div>
+            </h1>
+            <p class="hero-sub">I transform raw footage into high-converting assets using psychological pacing and advanced visual storytelling.</p>
+        </section>
 
-    <div class="proof-strip reveal">
-        <div class="container proof-container">
-            <div class="proof-item">
-                <h4>50K+</h4>
-                <p>Views Generated</p>
+        <section class="portfolio">
+            <div class="stats">
+                <div class="stat"><h2>500K+</h2><p>Views Generated</p></div>
+                <div class="stat"><h2>100%</h2><p>Satisfaction</p></div>
+                <div class="stat"><h2>10X</h2><p>Engagement</p></div>
             </div>
-            <div class="proof-item">
-                <h4>10x</h4>
-                <p>Engagement Boost</p>
-            </div>
-            <div class="proof-item">
-                <h4>24h</h4>
-                <p>Fast Delivery</p>
-            </div>
-        </div>
-    </div>
 
-    <section id="services" class="container">
-        <div class="reveal">
-            <h2 class="section-title">The Growth Engine</h2>
-            <p class="section-subtitle">Editing systems engineered specifically for conversion.</p>
-        </div>
-        
-        <div class="services-grid">
-            <div class="glass-card reveal delay-1">
-                <div class="card-icon">⚡</div>
-                <h3>Scroll-Stopping Reels</h3>
-                <p>Hook-based edits featuring dynamic pacing, b-roll, and visual disruptions that grab attention instantly and refuse to let go.</p>
-            </div>
-            <div class="glass-card reveal delay-2">
-                <div class="card-icon">🎯</div>
-                <h3>Content That Converts</h3>
-                <p>We don't just edit for views; we edit for authority. Strategic CTAs and branding designed to turn casual viewers into paying clients.</p>
-            </div>
-            <div class="glass-card reveal delay-3">
-                <div class="card-icon">⏱️</div>
-                <h3>Fast & Consistent Delivery</h3>
-                <p>The algorithm rewards consistency. Get your high-retention edits delivered on time, every time. Never miss a posting schedule again.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="portfolio" class="container">
-        <div class="reveal">
-            <h2 class="section-title">Featured Work</h2>
-            <p class="section-subtitle">Long-form edits that establish deep authority.</p>
-        </div>
-
-        <div class="work-grid">
-            <div class="video-card reveal delay-1">
-                <div class="video-wrapper">
-                    <iframe 
-  src="https://www.youtube.com/embed/VGXti6OJppg?controls=0&modestbranding=1"
-  frameborder="0" 
-  allowfullscreen>
-</iframe> frameborder="0" allowfullscreen></iframe>
+            <div class="grid">
+                <div class="card" data-tilt data-tilt-max="7">
+                    <div class="video-box">
+                        <iframe src="https://www.youtube.com/embed/VGXti6OJppg?modestbranding=1" allowfullscreen></iframe>
+                    </div>
+                    <div class="card-info">
+                        <span class="card-tag">VIRAL REEL</span>
+                        <h3>Fitness Authority</h3>
+                        <p style="color:var(--text-dim)">Dynamic captions + B-roll integration.</p>
+                    </div>
                 </div>
-                <div class="video-results">
-                    <h4>Fitness Masterclass Edit</h4>
-                    <div class="result-tags">
-                        <span class="tag">120K+ views</span>
-                        <span class="tag">10x engagement</span>
+
+                <div class="card" data-tilt data-tilt-max="7">
+                    <div class="video-box">
+                        <iframe src="https://www.youtube.com/embed/VGXti6OJppg?modestbranding=1" allowfullscreen></iframe>
+                    </div>
+                    <div class="card-info">
+                        <span class="card-tag">LONG FORM</span>
+                        <h3>Coaching Masterclass</h3>
+                        <p style="color:var(--text-dim)">Educational pacing for deep retention.</p>
                     </div>
                 </div>
             </div>
-            <div class="video-card reveal delay-2">
-                <div class="video-wrapper">
-                    <iframe 
-  src="https://www.youtube.com/embed/VGXti6OJppg?controls=0&modestbranding=1"
-  frameborder="0" 
-  allowfullscreen>
-</iframe> frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="video-results">
-                    <h4>Coaching VSL</h4>
-                    <div class="result-tags">
-                        <span class="tag">High Conversion</span>
-                        <span class="tag">Authority Building</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="container">
-        <div class="reveal">
-            <h2 class="section-title">Viral Shorts & Reels</h2>
-            <p class="section-subtitle">Optimized for maximum retention and algorithm push.</p>
-        </div>
-
-        <div class="shorts-grid">
-            <div class="video-card reveal delay-1">
-                <div class="short-wrapper">
-                    <iframe 
-  src="https://www.youtube.com/embed/Aw8_JmssEIU" 
-  frameborder="0" 
-  allowfullscreen>
-</iframe> frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="video-results">
-                    <h4>Gym Hook Masterclass</h4>
-                    <div class="result-tags" style="flex-wrap: wrap;">
-                        <span class="tag">High retention edit</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="video-card reveal delay-2">
-                <div class="short-wrapper">
-                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="video-results">
-                    <h4>Nutrition Tip Viral</h4>
-                    <div class="result-tags" style="flex-wrap: wrap;">
-                        <span class="tag">Viral pacing</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card reveal delay-3">
-                <div class="short-wrapper">
-                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="video-results">
-                    <h4>Workout Motivation</h4>
-                    <div class="result-tags" style="flex-wrap: wrap;">
-                        <span class="tag">Hook + captions optimized</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="video-card reveal delay-1">
-                <div class="short-wrapper">
-                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="video-results">
-                    <h4>Client Transformation</h4>
-                    <div class="result-tags" style="flex-wrap: wrap;">
-                        <span class="tag">Conversion focused</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="container reveal">
-        <div class="transformation-banner">
-            <h2>Same footage. <span class="text-gradient">Completely different impact.</span></h2>
-            <p>Raw footage is boring. I inject pacing, visual storytelling, and psychological hooks that turn swipers into subscribers.</p>
-        </div>
-    </section>
-
-    <section id="about" class="container reveal">
-        <div class="about-content">
-            <h2 class="section-title">Behind the Edits</h2>
-            <p>Hey, I'm <span>Faisal</span> — a video editor focused exclusively on helping fitness creators grow using high-retention edits.</p>
-            <br>
-            <p>I don't just "cut footage together." I reverse-engineer what makes people watch, engage, and buy. From the 3-second hook to the final CTA, I create content that keeps people watching and <span>converts them into paying clients.</span></p>
-        </div>
-    </section>
-
-    <section id="offer" class="container reveal">
-        <div class="offer-card">
-            <span class="offer-tag">Starter Offer (Limited)</span>
-            <h2 class="section-title" style="margin-bottom: 0;">Growth Package</h2>
-            <div class="price">₹2999<span style="font-size: 1.2rem; color: var(--text-secondary); font-weight: 500;">/mo</span></div>
-            
-            <ul class="offer-list">
-                <li>10 High-Impact Reels/Shorts per month</li>
-                <li>Psychological Hooks + Dynamic Captions</li>
-                <li>Advanced Subtitles & Motion Graphics</li>
-                <li>High-Retention Pacing & Audio Design</li>
-            </ul>
-            
-            <br>
-            <a href="#contact" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1.2rem;">Claim This Offer</a>
-            <p class="urgency">🔥 Only available for the first 3 clients (2 spots left)</p>
-        </div>
-    </section>
-
-    <section id="contact" class="container">
-        <div class="reveal">
-            <h2 class="section-title">Let’s grow your content 🚀</h2>
-            <p class="section-subtitle">Fill out the form below to see if we're a good fit.</p>
-        </div>
-
-        <div class="contact-wrapper reveal delay-1">
-            <form id="growth-form">
-                <div class="form-group">
-                    <input type="text" id="name" placeholder="Your Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" id="email" placeholder="Your Email Address" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="niche" placeholder="Your Niche (e.g. Online Coach, Powerlifter)" required>
-                </div>
-                <div class="form-group">
-                    <select id="followers" required>
-                        <option value="" disabled selected>Current Follower Count</option>
-                        <option value="0-10k">0 - 10k</option>
-                        <option value="10k-50k">10k - 50k</option>
-                        <option value="50k-100k">50k - 100k</option>
-                        <option value="100k+">100k+</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <select id="goal" required>
-                        <option value="" disabled selected>Primary Goal</option>
-                        <option value="clients">Getting More Paying Clients</option>
-                        <option value="growth">Rapid Follower Growth</option>
-                        <option value="branding">Personal Branding & Authority</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1.2rem;">Start Growing Now</button>
-                <div id="form-success">Message sent successfully! I'll be in touch soon.</div>
-                <p class="microcopy">I reply to all inquiries within 24 hours.</p>
-            </form>
-        </div>
-    </section>
-
-    <footer style="text-align: center; padding: 2rem 0; border-top: 1px solid var(--border-glass); margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
-        <p>&copy; 2026 Faisal. Engineered for Conversion.</p>
-    </footer>
-
-    <a href="https://wa.me/916294288920?text=Hi%20Faisal%2C%20I%20saw%20your%20portfolio%20and%20I%E2%80%99m%20interested%20in%20your%20video%20editing%20services." 
-       target="_blank" 
-       class="whatsapp-float">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-            <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zM223.9 414.7c-32 0-64.4-8.5-92.4-24.6l-6.6-3.9-68.6 18 18.3-66.9-4.3-6.8c-17.7-28.2-27-61-27-94.6 0-103.3 84.1-187.4 187.6-187.4 50.1 0 97.2 19.5 132.6 54.9 35.4 35.4 54.9 82.5 54.9 132.6 0 103.3-84.1 187.4-187.6 187.4zm102.6-140.2c-5.6-2.8-33.3-16.4-38.5-18.3-5.2-1.9-8.9-2.8-12.7 2.8-3.8 5.6-14.5 18.3-17.8 22.1-3.3 3.8-6.6 4.2-12.2 1.4-5.6-2.8-23.7-8.8-45.1-27.9-16.7-14.9-28-33.3-31.3-38.9-3.3-5.6-.4-8.6 2.4-11.4 2.5-2.5 5.6-6.6 8.5-9.9 2.8-3.3 3.8-5.6 5.6-9.4 1.9-3.8.9-7.1-.5-9.9-1.4-2.8-12.7-30.6-17.4-41.9-4.6-11.3-9.3-9.8-12.7-9.9-3.3-.1-7.1-.1-10.8-.1-3.8 0-9.9 1.4-15 7-5.2 5.6-20.2 19.7-20.2 48s20.7 55.4 23.5 59.2c2.8 3.8 40.4 61.6 97.9 86.4 13.7 5.9 24.4 9.4 32.8 12 13.7 4.3 26.2 3.7 36 2.2 11-1.7 33.3-13.6 38-26.8 4.6-13.2 4.6-24.4 3.3-26.8-1.3-2.4-5.1-3.8-10.7-6.6z"/>
-        </svg>
-    </a>
+        <section class="cta" id="contact">
+            <h2 style="font-size: 4rem; margin-bottom: 2rem;">Ready to dominate?</h2>
+            <p style="margin-bottom: 3rem; color: var(--text-dim);">Now accepting clients for 2026 growth partnerships.</p>
+            <a href="https://wa.me/916294288920" class="btn">Start Project</a>
+        </section>
+    </main>
 
     <script>
-        // Sticky Navbar effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+        // 1. Custom Smooth Cursor
+        const cursor = document.querySelector('#cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
         });
 
-        // Intersection Observer for smooth scroll reveals
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealOptions = {
-            threshold: 0.15,
-            rootMargin: "0px 0px -50px 0px"
-        };
+        // 2. Three.js - 3D Background Mesh
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        const revealOnScroll = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) return;
-                entry.target.classList.add('active');
-                observer.unobserve(entry.target);
+        const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        const material = new THREE.MeshPhongMaterial({ color: 0x7c3aed, wireframe: true });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x202020));
+        camera.position.z = 30;
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            mesh.rotation.x += 0.001;
+            mesh.rotation.y += 0.001;
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        // 3. GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Text reveal
+        gsap.from(".t-rev", {
+            y: 200, duration: 1.2, stagger: 0.3, ease: "power4.out"
+        });
+        gsap.to(".hero-sub", { opacity: 1, y: -20, delay: 1, duration: 1 });
+
+        // Scroll Reveal for cards
+        gsap.utils.toArray(".card").forEach(card => {
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: "top 85%" },
+                opacity: 0, y: 100, duration: 1, ease: "power3.out"
             });
-        }, revealOptions);
-
-        revealElements.forEach(el => {
-            revealOnScroll.observe(el);
         });
 
-        // Form Submission Simulation
-        document.getElementById('growth-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]');
-            const successMsg = document.getElementById('form-success');
-            
-            const originalText = btn.innerText;
-            btn.innerText = "Sending Request...";
-            btn.style.opacity = "0.7";
-            
-            // Simulate network request
-            setTimeout(() => {
-                btn.style.display = "none";
-                successMsg.style.display = "block";
-                this.reset();
-                
-                // Reset form after 4 seconds
-                setTimeout(() => {
-                    btn.style.display = "block";
-                    btn.innerText = originalText;
-                    btn.style.opacity = "1";
-                    successMsg.style.display = "none";
-                }, 4000);
-            }, 1500);
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // 4. Initialize 3D Tilt
+        VanillaTilt.init(document.querySelectorAll("[data-tilt]"), {
+            max: 10, speed: 1000, glare: true, "max-glare": 0.3, scale: 1.05
+        });
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
